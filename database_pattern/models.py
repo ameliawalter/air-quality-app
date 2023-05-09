@@ -1,9 +1,10 @@
-from sqlalchemy import Column, String, ForeignKey, create_engine, Table
+from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric
 from sqlalchemy.orm import sessionmaker, relationship
 import requests
 from base import Base
 
 engine = create_engine("sqlite:///airquality.db")
+
 
 class Station(Base):
     __tablename__ = "stations"
@@ -14,6 +15,7 @@ class Station(Base):
     station_address = Column(String(50))
     city_name = Column(String(50), ForeignKey("cities.city_name"))
     cities = relationship("City", back_populates="stations")
+    sensors = relationship("Sensor", back_populates="stations")
     __table_args__ = {"extend_existing": True}
 
     def __repr__(self):
@@ -23,6 +25,7 @@ class Station(Base):
             self.gegr_lat,
             self.gegr_lon,
         )
+
 
 def add_all_stations():
     url = "https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll?size=500"
@@ -63,6 +66,7 @@ class City(Base):
     communes = relationship("Commune", back_populates="cities")
     __table_args__ = {"extend_existing": True}
 
+
 def add_all_cities():
     url = "https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll?size=500"
     try:
@@ -90,6 +94,7 @@ def add_all_cities():
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
+
 class Commune(Base):
     __tablename__ = "communes"
     commune_name = Column(String(50), primary_key=True)
@@ -97,6 +102,7 @@ class Commune(Base):
     province_name = Column(String(50))
     cities = relationship("City", back_populates="communes")
     __table_args__ = {"extend_existing": True}
+
 
 def add_all_communes():
     url = "https://api.gios.gov.pl/pjp-api/v1/rest/station/findAll?size=500"
@@ -125,9 +131,94 @@ def add_all_communes():
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
+
+class Sensor(Base):
+    __tablename__ = "sensors"
+    sensor_id = Column(String(50), primary_key=True)
+    station_id = Column(String(50), ForeignKey("stations.station_id"))
+    id_param = Column(String(50))
+    param_name = Column(String(50))
+    param_formula = Column(String(50))
+    param_code = Column(String(50))
+    stations = relationship("Station", back_populates="sensors")
+    results = relationship("Result", back_populates="sensors")
+    __table_args__ = {"extend_existing": True}
+
+
+def add_sensors_to_station(station_id):
+    # station_id
+    url = f"https://api.gios.gov.pl/pjp-api/v1/rest/station/sensors/{station_id}?size=500"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        Session = sessionmaker(bind=engine)
+        Session.configure(bind=engine)
+        session = Session()
+
+        for sensor_dict in data['Lista stanowisk pomiarowych dla podanej stacji']:
+            sensor_id = sensor_dict['Identyfikator stanowiska']
+            existing_sensor = session.query(Sensor).filter(Sensor.sensor_id == sensor_id).first()
+            if not existing_sensor:
+                sensor = Sensor()
+                sensor.sensor_id = sensor_dict['Identyfikator stanowiska']
+                sensor.station_id = sensor_dict['Identyfikator stacji']
+                sensor.id_param = sensor_dict['Id wskaźnika']
+                sensor.param_name = sensor_dict['Wskaźnik']
+                sensor.param_formula = sensor_dict['Wskaźnik - wzór']
+                sensor.param_code = sensor_dict['Wskaźnik - kod']
+                session.add(sensor)
+
+        session.commit()
+        session.close()
+
+    except requests.exceptions.RequestException as e:
+        print("Request failed:", e)
+
+
+class Result(Base):
+    __tablename__ = "results"
+    sensor_code = Column(String(50))
+    sensor_id = Column(String(50), ForeignKey("sensors.sensor_id"))
+    timestamp = Column(String(50), primary_key=True)
+    value = Column(Numeric(20))
+    sensors = relationship("Sensor", back_populates="results")
+    __table_args__ = {"extend_existing": True}
+
+
+def add_values_by_sensor(sensor_id):
+    url = f"https://api.gios.gov.pl/pjp-api/v1/rest/data/getData/{sensor_id}?size=500"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        Session = sessionmaker(bind=engine)
+        Session.configure(bind=engine)
+        session = Session()
+
+        for result_dict in data['Lista danych pomiarowych']:
+            timestamp = result_dict['Data']
+            existing_timestamp = session.query(Result).filter(Result.timestamp == timestamp).first()
+            if not existing_timestamp:
+                result = Result()
+                result.sensor_code = result_dict['Kod stanowiska']
+                result.sensor_id = sensor_id
+                result.timestamp = result_dict['Data']
+                result.value = result_dict['Wartość']
+                session.add(result)
+
+        session.commit()
+        session.close()
+
+    except requests.exceptions.RequestException as e:
+        print("Request failed:", e)
+
+
 if __name__ == '__main__':
     metadata = Base.metadata
     metadata.create_all(engine)
     add_all_cities()
     add_all_stations()
     add_all_communes()
+    add_sensors_to_station(129)
+    add_values_by_sensor(737)
