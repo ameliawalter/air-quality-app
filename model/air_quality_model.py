@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect
+from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect, Float
 from sqlalchemy.orm import sessionmaker, relationship
 import requests
 from base import Base
@@ -10,22 +10,14 @@ class Station(Base):
     __tablename__ = "stations"
     station_id = Column(String(50), primary_key=True)
     station_name = Column(String(50))
-    gegr_lat = Column(String(50))
-    gegr_lon = Column(String(50))
+    lat = Column(Float(50))
+    lon = Column(Float(50))
     station_address = Column(String(50))
     city_name = Column(String(50), ForeignKey("cities.city_name"))
     cities = relationship("City", back_populates="stations")
     sensors = relationship("Sensor", back_populates="stations")
     index = relationship("Index", back_populates="stations")
     __table_args__ = {"extend_existing": True}
-
-    def __repr__(self):
-        return "<Station(station_id='%s', station_name='%s', gegr_lat='%s', gegr_lon='%s')>" % (
-            self.station_id,
-            self.station_name,
-            self.gegr_lat,
-            self.gegr_lon,
-        )
 
 
 def add_all_stations():
@@ -45,8 +37,8 @@ def add_all_stations():
                 station = Station()
                 station.station_id = station_dict['Identyfikator stacji']
                 station.station_name = station_dict['Nazwa stacji']
-                station.gegr_lat = station_dict['WGS84 λ E']
-                station.gegr_lon = station_dict['WGS84 φ N']
+                station.lon = station_dict['WGS84 λ E']
+                station.lat = station_dict['WGS84 φ N']
                 station.station_address = station_dict['Ulica']
                 station.city_name = station_dict['Nazwa miasta']
                 session.add(station)
