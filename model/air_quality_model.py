@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric
+from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect
 from sqlalchemy.orm import sessionmaker, relationship
 import requests
 from base import Base
@@ -16,6 +16,7 @@ class Station(Base):
     city_name = Column(String(50), ForeignKey("cities.city_name"))
     cities = relationship("City", back_populates="stations")
     sensors = relationship("Sensor", back_populates="stations")
+    index = relationship("Index", back_populates="stations")
     __table_args__ = {"extend_existing": True}
 
     def __repr__(self):
@@ -214,11 +215,62 @@ def add_values_by_sensor(sensor_id):
         print("Request failed:", e)
 
 
+class Index(Base):
+    __tablename__ = "index"
+    station_id = Column(String(50), ForeignKey("stations.station_id"))
+    timestamp = Column(String(50), primary_key=True)
+    timestamp_source_data = Column(String(50))
+    index_value = Column(Numeric(20))
+    critical_code = Column(String(50))
+    stations = relationship("Station", back_populates="index")
+    __table_args__ = {"extend_existing": True}
+
+
+def add_aq_index_values(station_id):
+    url = f"https://api.gios.gov.pl/pjp-api/v1/rest/aqindex/getIndex/{station_id}?size=500"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        Session = sessionmaker(bind=engine)
+        Session.configure(bind=engine)
+        session = Session()
+
+        timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
+        existing_timestamp = session.query(Index).filter(Index.timestamp == timestamp).first()
+        if not existing_timestamp:
+            index = Index()
+            index.station_id = station_id
+            index.timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
+            index.timestamp_source_data = data['AqIndex'][
+                'Data danych źródłowych, z których policzono wartość indeksu dla wskaźnika st']
+            index.index_value = data['AqIndex']['Wartość indeksu']
+            index.critical_code = data['AqIndex']['Kod zanieczyszczenia krytycznego']
+            session.add(index)
+
+        session.commit()
+        session.close()
+
+    except requests.exceptions.RequestException as e:
+        print("Request failed:", e)
+
+
+def clear_database():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    session.commit()
+    session.close()
+
+
 if __name__ == '__main__':
+    clear_database()
     metadata = Base.metadata
     metadata.create_all(engine)
+    add_all_communes()
     add_all_cities()
     add_all_stations()
-    add_all_communes()
     add_sensors_to_station(129)
     add_values_by_sensor(737)
+    add_aq_index_values(129)
