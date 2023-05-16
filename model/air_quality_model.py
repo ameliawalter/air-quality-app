@@ -1,9 +1,7 @@
-from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect, Float
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect, Float, MetaData
+from sqlalchemy.orm import relationship
 import requests
-from base import Base
-
-engine = create_engine("sqlite:///airquality.db")
+from model.base import Base, Session, engine
 
 
 class Station(Base):
@@ -26,9 +24,8 @@ def add_all_stations():
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
+
 
         for station_dict in data['Lista stacji pomiarowych']:
             station_id = station_dict['Identyfikator stacji']
@@ -44,7 +41,7 @@ def add_all_stations():
                 session.add(station)
 
         session.commit()
-        session.close()
+        Session.remove()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
@@ -66,9 +63,6 @@ def add_all_cities():
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
 
         for city_dict in data['Lista stacji pomiarowych']:
@@ -82,7 +76,7 @@ def add_all_cities():
                 session.add(city)
 
         session.commit()
-        session.close()
+        Session.remove()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
@@ -103,9 +97,6 @@ def add_all_communes():
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
 
         for commune_dict in data['Lista stacji pomiarowych']:
@@ -119,17 +110,18 @@ def add_all_communes():
                 session.add(commune)
 
         session.commit()
-        session.close()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
+    finally:
+        Session.remove()
 
 
 class Sensor(Base):
     __tablename__ = "sensors"
     sensor_id = Column(String(50), primary_key=True)
     station_id = Column(String(50), ForeignKey("stations.station_id"))
-    id_param = Column(String(50))
+    param_id = Column(String(50))
     param_name = Column(String(50))
     param_formula = Column(String(50))
     param_code = Column(String(50))
@@ -145,8 +137,6 @@ def add_sensors_to_station(station_id):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
 
         for sensor_dict in data['Lista stanowisk pomiarowych dla podanej stacji']:
@@ -156,14 +146,14 @@ def add_sensors_to_station(station_id):
                 sensor = Sensor()
                 sensor.sensor_id = sensor_dict['Identyfikator stanowiska']
                 sensor.station_id = sensor_dict['Identyfikator stacji']
-                sensor.id_param = sensor_dict['Id wskaźnika']
+                sensor.param_id = sensor_dict['Id wskaźnika']
                 sensor.param_name = sensor_dict['Wskaźnik']
                 sensor.param_formula = sensor_dict['Wskaźnik - wzór']
                 sensor.param_code = sensor_dict['Wskaźnik - kod']
                 session.add(sensor)
 
         session.commit()
-        session.close()
+        Session.remove()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
@@ -185,8 +175,6 @@ def add_values_by_sensor(sensor_id):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
 
         for result_dict in data['Lista danych pomiarowych']:
@@ -201,7 +189,7 @@ def add_values_by_sensor(sensor_id):
                 session.add(result)
 
         session.commit()
-        session.close()
+        Session.remove()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
@@ -224,8 +212,6 @@ def add_aq_index_values(station_id):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        Session = sessionmaker(bind=engine)
-        Session.configure(bind=engine)
         session = Session()
 
         timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
@@ -241,25 +227,23 @@ def add_aq_index_values(station_id):
             session.add(index)
 
         session.commit()
-        session.close()
+        Session.remove()
 
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
 
 def clear_database():
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    session.commit()
-    session.close()
+    inspector = inspect(engine)
+    if inspector.has_table("stations"):
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    Session.remove()
 
 
 if __name__ == '__main__':
+    Base.metadata.create_all(engine)
     clear_database()
-    metadata = Base.metadata
-    metadata.create_all(engine)
     add_all_communes()
     add_all_cities()
     add_all_stations()
