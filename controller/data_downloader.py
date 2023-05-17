@@ -20,15 +20,97 @@ def get_stations_list():
     finally:
         Session.remove()
 
+def get_station_ids_list():
+    session = Session()
+    try:
+        stations_ids_query = 'SELECT station_id FROM stations'
+        stations_ids_df = pd.read_sql_query(stations_ids_query, session.bind)
+        return stations_ids_df['station_id'].tolist()
+    finally:
+        Session.remove()
+
+def get_sensor_ids_list():
+    session = Session()
+    try:
+        sensors_ids_query = 'SELECT sensor_id FROM sensors'
+        sensors_ids_df = pd.read_sql_query(sensors_ids_query, session.bind)
+        return sensors_ids_df['sensor_id'].tolist()
+    finally:
+        Session.remove()
+
 def get_station_details(station_id):
     session = Session()
     try:
-        # station_details_query = f'SELECT station_name, station_address, city_name FROM stations WHERE station_id="{station_id}"'
         station_details_query = f'SELECT stations.station_name, stations.station_address, stations.city_name, ' \
                                 f'sensors.sensor_id, sensors.param_name, sensors.param_id FROM stations JOIN sensors ' \
                                 f'ON stations.station_id=sensors.station_id WHERE stations.station_id="{station_id}" '
         station_details_df = pd.read_sql_query(station_details_query, session.bind)
         return station_details_df
+    finally:
+        Session.remove()
+
+def get_station_details_by_city(city):
+    session = Session()
+    try:
+        station_details_query = f'SELECT stations.station_name, stations.station_address, stations.city_name, ' \
+                                f'sensors.sensor_id, sensors.param_name, sensors.param_id FROM stations JOIN sensors ' \
+                                f'ON stations.station_id=sensors.station_id WHERE stations.city_name="{city}" '
+        station_details_df = pd.read_sql_query(station_details_query, session.bind)
+        return station_details_df
+    finally:
+        Session.remove()
+
+def get_station_results(station_id):
+    session = Session()
+    try:
+        station_results_query = f'''
+            SELECT 
+                stations.station_name, 
+                stations.lon, 
+                stations.lat, 
+                results.sensor_code, 
+                results.timestamp, 
+                results.value 
+            FROM 
+                stations 
+            LEFT JOIN 
+                sensors ON stations.station_id = sensors.station_id 
+            LEFT JOIN 
+                results ON results.sensor_id = sensors.sensor_id 
+            WHERE 
+                stations.station_id="{station_id}" 
+            AND 
+                results.timestamp = (SELECT MAX(results.timestamp) FROM results)
+            '''
+
+        station_results_df = pd.read_sql_query(station_results_query, session.bind)
+        return station_results_df
+    finally:
+        Session.remove()
+
+def get_all_stations_results():
+    session = Session()
+    try:
+        station_results_query = f'''
+            SELECT 
+                stations.station_name, 
+                stations.lon, 
+                stations.lat, 
+                results.sensor_code, 
+                results.timestamp, 
+                results.value 
+            FROM 
+                stations 
+            JOIN 
+                sensors ON stations.station_id = sensors.station_id 
+            JOIN 
+                results ON results.sensor_id = sensors.sensor_id 
+            WHERE 
+                results.timestamp = (SELECT MAX(results.timestamp) FROM results)
+            '''
+
+        station_results_df = pd.read_sql_query(station_results_query, session.bind)
+        return station_results_df
     finally:
         Session.remove()
 
@@ -44,7 +126,12 @@ def get_sensors_list():
 def get_sensor_results(sensor_id):
     session = Session()
     try:
-        results_query = f'SELECT sensor_id, sensor_code, timestamp, value FROM results WHERE sensor_id="{sensor_id}"'
+        results_query = f'''SELECT 
+        stations.station_id, results.sensor_id, results.sensor_code, results.timestamp, results.value 
+        FROM results 
+        JOIN sensors ON results.sensor_id=sensors.sensor_id 
+        JOIN stations ON sensors.station_id=stations.station_id 
+        WHERE results.sensor_id="{sensor_id}"'''
         results_df = pd.read_sql_query(results_query, session.bind)
         return results_df
     finally:
