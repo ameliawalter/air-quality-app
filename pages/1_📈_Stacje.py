@@ -1,11 +1,14 @@
 import streamlit as st
+from model.data_downloader import get_stations_list, get_station_details, get_station_details_by_city
 
-from controller.data_downloader import get_stations_list, get_station_details, get_station_details_by_city
+'''
+Page allowing the user to display stations details by station ID (tab 1) or by city (tab 2).
+'''
 
 tab1, tab2 = st.tabs(["Stacje po ID", "Stacje w danym mieście"])
 
 with tab1:
-    st.write(':blue[Wybierz stacje z bocznego menu, żeby wyświetlić szczegóły na temat mierzonych parametrów.]')
+    st.write(':blue[Wybierz ID stacji z bocznego menu, żeby wyświetlić szczegóły na temat mierzonych parametrów.]')
 
     st.sidebar.title("Szukaj")
     st.sidebar.write("Wyświetl więcej szczegółów wybranej stacji")
@@ -40,6 +43,7 @@ with tab1:
             st.write("Wybierz ID stacji w bocznym menu.")
 
 with tab2:
+    st.write(':blue[Wyszukaj wszystkie stacje w danym mieście, żeby wyświetlić szczegóły na temat mierzonych parametrów.]')
     city = st.text_input("Wpisz miasto")
     if city:
         station_info = get_station_details_by_city(city)

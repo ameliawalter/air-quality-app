@@ -2,24 +2,30 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from controller.data_downloader import get_sensor_results, get_sensors_list
+from model.data_downloader import get_sensor_results, get_sensor_ids_list
+from model.api_handler import add_values_by_sensor
 
-st.title(":blue[Wyniki pomiarów]")
-st.write("Wybierz z bocznego menu ID sensora. Poniżej możesz zobaczyć wyniki z ostatnich 3 dni dla danego sensora (czyli danego parametru jakości powietrza w konkretnej stacji).")
+'''
+Page allowing the user to display results by sensor from the most recent 3 days as a table (tab 1) or as a chart with statistics (tab 2).
+'''
+
+st.title(":blue[Wyniki pomiarów danego sensora z ostatnich dni]")
+st.write('''Wybierz z bocznego menu ID sensora. Poniżej możesz zobaczyć wyniki z ostatnich 3 dni dla danego sensora 
+(czyli danego parametru jakości powietrza w konkretnej stacji) w postaci tabeli oraz wykresu i podstawowych statystyk.''')
 
 tab1, tab2 = st.tabs(["Tabela wyników", "Statystyki"])
 
 with tab1:
     st.sidebar.write("Wyświetl pomiary danego sensora")
 
-    results_df = get_sensors_list()
-    sensor_ids = results_df['sensor_id'].tolist()
+    sensor_ids = get_sensor_ids_list()
 
     activate_search_window = st.sidebar.checkbox("Wpisz samodzielnie ID sensora")
 
     if activate_search_window:
         sensor_id = st.sidebar.text_input("Wpisz ID sensora")
         if sensor_id:
+            add_values_by_sensor(sensor_id)
             sensor_info = get_sensor_results(sensor_id)
             if sensor_info.empty:
                 st.write("Brak wyników lub sensora.")
@@ -27,18 +33,20 @@ with tab1:
                 st.write(sensor_info)
         else:
             st.write("Wpisz ID sensora w bocznym menu.")
+
     else:
         selected_sensor_id = st.sidebar.selectbox("Wybierz ID sensora", sensor_ids)
-
         if selected_sensor_id:
+            add_values_by_sensor(selected_sensor_id)
             sensor_info = get_sensor_results(selected_sensor_id)
             if sensor_info.empty:
-                st.write("Taka stacja nie istnieje.")
+                st.write("Taki sensor nie istnieje.")
             else:
                 st.write(sensor_info)
         else:
-            st.write("Wybierz ID stacji w bocznym menu.")
+            st.write("Wybierz ID sensora w bocznym menu.")
 
+# Add a chart in tab2
 with tab2:
     import altair as alt
     chart = alt.Chart(sensor_info).mark_line().encode(
@@ -47,8 +55,6 @@ with tab2:
     )
 
     st.altair_chart(chart)
-    # sensor_info['timestamp'] = pd.to_datetime(sensor_info['timestamp'], format='%Y-%m-%d %H:%M:%S')
-    # st.line_chart(sensor_info)
     max_row = sensor_info.loc[sensor_info['value'].idxmax()]
     min_row = sensor_info.loc[sensor_info['value'].idxmin()]
     st.write(f"Wartość maksymalna: {max_row['value']} o godzinie: {max_row['timestamp']}")
