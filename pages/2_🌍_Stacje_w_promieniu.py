@@ -30,7 +30,7 @@ location = st.text_input('Wprowadź lokalizację:')
 radius = st.slider("Promień wyszukiwania (km)", 1, 100, 10)
 
 if location:
-    geolocator = Nominatim(user_agent="geoapiExercises")
+    geolocator = Nominatim(user_agent="Ameliasapp")
     location = geolocator.geocode(location)
     if location is None:
         st.error('Nie znaleziono podanej lokalizacji. Wprowadź prawidłową wartość.')
