@@ -3,6 +3,7 @@
  The web application is the final project for Python programming postgraduate course (2022/23, Collegium da Vinci, Poznań, Poland). <br><br>
  **Technical stack** 🐍📉🖧📊🗺️
   *   Language: [Python 3](https://www.python.org/)
+  *   Unit tests: [Pytest](https://docs.pytest.org/) TO DO
   *   Frontend, hosting: [Streamlit](https://streamlit.io/)
   *   Database: [SQLite](https://sqlite.org/index.html)
   *   ORM: [SQLAlchemy](https://www.sqlalchemy.org/)
