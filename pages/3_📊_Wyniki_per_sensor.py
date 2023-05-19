@@ -2,7 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from modell import get_sensor_results, get_sensor_ids_list
+from model.data_downloader import get_sensor_results, get_sensor_ids_list
 from model.api_handler import add_values_by_sensor
 
 '''

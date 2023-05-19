@@ -1,5 +1,5 @@
 import streamlit as st
-from modell import get_stations_list, get_station_details, get_station_details_by_city
+from model.data_downloader import get_stations_list, get_station_details, get_station_details_by_city
 
 '''
 Page allowing the user to display stations details by station ID (tab 1) or by city (tab 2).
