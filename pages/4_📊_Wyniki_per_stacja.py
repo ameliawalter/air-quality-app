@@ -4,13 +4,13 @@ from model.data_downloader import get_station_results, get_sensors_by_station_li
 from model.api_handler import add_values_by_sensor
 
 '''
-Page allowing the user to display all sensors' last recorded results by station as a table (tab 1) or as charts by parameter (tab 2).
+Page allowing the user to display all sensors' results by station as a table (tab 1) or as charts by parameter (tab 2).
 '''
 
-st.title(":blue[Wyniki pomiarów wszystkich parametrów dla stacji z ostatniej godziny]")
-st.write("Wybierz z bocznego menu ID stacji. Poniżej możesz zobaczyć wyniki z ostatniej godziny dla danej stacji.")
+st.title(":blue[Wyniki pomiarów wszystkich parametrów dla stacji]")
+st.write("Wybierz z bocznego menu ID stacji. Poniżej możesz zobaczyć wyniki wszystkich sensorów z danej stacji.")
 
-tab1, tab2 = st.tabs(["Tabela wyników", "Statystyki"])
+tab1, tab2 = st.tabs(["Tabela wyników z ostatniej godziny", "Wykresy trzydniowe"])
 
 station_ids = get_station_ids_list()
 station_id = st.sidebar.selectbox("Wybierz ID stacji", station_ids)
