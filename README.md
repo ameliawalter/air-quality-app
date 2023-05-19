@@ -1,20 +1,20 @@
 # air-quality-app
 
- <p>The web application is the final project for Python programming postgraduate course (2022/23, Collegium da Vinci, Poznań, Poland). <br><br></p>
- Technical stack:<br>
-  *   Language: Python 3
-  *   Frontend and hosting: Streamlit
-  *   Database: SQLite
-  *   ORM: SQLAlchemy
-  *   Statistics: pandas, numpy
-  *   Charts: matplotlib
-  *   Maps, visualizations: pydeck, geopandas
-<br>
-<p>To run the app locally:<br><br></p>
- - clone the code
- - place yourself in the /air_quality_app directory 
- - in terminal run the command: streamlit run app.py
- <br>
- To see the app online, go to [this link](https://ameliawalter-air-quality-app-app-1psjon.streamlit.app/) where the app is hosted by Streamlit.
+ The web application is the final project for Python programming postgraduate course (2022/23, Collegium da Vinci, Poznań, Poland). <br><br>
+ **Technical stack** 🐍📉🖧📊🗺️
+  *   Language: [Python 3](https://www.python.org/)
+  *   Frontend, hosting: [Streamlit](https://streamlit.io/)
+  *   Database: [SQLite](https://sqlite.org/index.html)
+  *   ORM: [SQLAlchemy](https://www.sqlalchemy.org/)
+  *   Statistics: [pandas](https://pandas.pydata.org/), [numpy](https://numpy.org/)
+  *   Charts: [matplotlib](https://matplotlib.org/)
+  *   Maps, visualizations: [pydeck](https://pydeck.gl/), [geopandas](https://geopandas.org/en/stable/), [openstreetmap](https://www.openstreetmap.org/#map=7/52.046/19.193)
+
+ **To run the app locally**
+  * clone the code
+  * place yourself in the /air_quality_app directory 
+  * run the command in terminal : *streamlit run app.py*
+
+ 🔛 To see the app online, go to [this link](https://ameliawalter-air-quality-app-app-1psjon.streamlit.app/) where the app is hosted by Streamlit.
 
  
