@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, ForeignKey, create_engine, Table, Numeric, inspect, Float, MetaData, Integer
+from sqlalchemy import Column, String, ForeignKey, Numeric, Float, Integer
 from sqlalchemy.orm import relationship
-from model.base import Base, Session, engine
-from concurrent.futures import ThreadPoolExecutor
+from model.base import Base
 
 '''
 Module containing models for object-relational mapping with SQLAlchemy.

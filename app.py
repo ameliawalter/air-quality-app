@@ -1,6 +1,6 @@
 import sys
 import os
-from model.data_downloader import get_stations_map, get_station_ids_list
+from modell import get_stations_map, get_station_ids_list
 import streamlit as st
 import pydeck as pdk
 from model.api_handler import clear_database, add_all_communes, add_all_cities, add_all_stations, add_sensors_to_station

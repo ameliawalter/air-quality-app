@@ -1,6 +1,6 @@
 import streamlit as st
 from matplotlib import pyplot as plt
-from model.data_downloader import get_station_results, get_sensors_by_station_list, get_latest_station_results, get_station_ids_list
+from modell import get_station_results, get_sensors_by_station_list, get_latest_station_results, get_station_ids_list
 from model.api_handler import add_values_by_sensor
 
 '''

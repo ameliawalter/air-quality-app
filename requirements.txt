@@ -9,5 +9,3 @@ altair~=4.2.2
 geopandas~=0.13.0
 geopy~=2.3.0
 shapely~=2.0.1
-model
-pages
