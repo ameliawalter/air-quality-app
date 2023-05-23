@@ -12,7 +12,7 @@ if root_dir not in sys.path:
 
 # Initial actions to create DB and populate it with stations
 Base.metadata.create_all(engine)
-clear_database()
+# clear_database()
 add_all_communes()
 add_all_cities()
 add_all_stations()
