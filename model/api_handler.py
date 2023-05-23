@@ -1,15 +1,14 @@
+"""
+Module containing functions to get air quality data from API into SQLite database using SQLAlchemy model and requests library.
+Function clear_database() has been included due to GIOS API's station IDs not being constant.
+As they are changed on an unpredictable basis, DB needs to be cleared everytime the app is run.
+"""
+
 from sqlalchemy import inspect
 import requests
 from model.data_downloader import get_sensor_results
 from model.air_quality_model import Commune, City, Station, Sensor, Result, Index
 from model.base import Base, Session, engine
-
-'''
-Module containing functions to get air quality data from API into SQLite database using SQLAlchemy model and requests library.
-Function clear_database() has been included due to GIOS API's station IDs not being constant. 
-As they are changed on an unpredictable basis, DB needs to be cleared everytime the app is run.
-'''
-
 
 def clear_database():
     inspector = inspect(engine)

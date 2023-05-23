@@ -1,9 +1,11 @@
+"""
+Base for creating scoped sessions.
+"""
+
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session
-'''
-Base for creating scoped sessions.
-'''
+
 Base = declarative_base()
 dir_path = Path(__file__).parent
 db_path = dir_path / 'airquality.db'

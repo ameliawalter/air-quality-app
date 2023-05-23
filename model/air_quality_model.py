@@ -1,10 +1,11 @@
+"""
+Module containing models for object-relational mapping with SQLAlchemy.
+"""
+
 from sqlalchemy import Column, String, ForeignKey, Numeric, Float, Integer
 from sqlalchemy.orm import relationship
 from model.base import Base
 
-'''
-Module containing models for object-relational mapping with SQLAlchemy.
-'''
 class Commune(Base):
     __tablename__ = "communes"
     commune_name = Column(String(50), primary_key=True)

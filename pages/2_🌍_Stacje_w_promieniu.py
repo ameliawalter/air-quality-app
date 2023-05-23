@@ -1,3 +1,7 @@
+"""
+Page allowing the user to input a location name and search for station within a selected radius, then display it on a map.
+"""
+
 import streamlit as st
 from geopy.geocoders import Nominatim
 from math import radians, cos, sin, sqrt, atan2
@@ -7,10 +11,6 @@ from shapely.geometry import Point
 import pandas as pd
 from model.air_quality_model import Station
 from model.base import Session
-
-'''
-Page allowing the user to input a location name and search for station within a selected radius, then display it on a map.
-'''
 
 # Function to calculate distance using Haversine formula
 def calculate_distance(lat1, lon1, lat2, lon2):

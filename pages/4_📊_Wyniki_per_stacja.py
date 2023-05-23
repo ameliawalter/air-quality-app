@@ -1,11 +1,11 @@
+"""
+Page allowing the user to display all sensors' results by station as a table (tab 1) or as charts by parameter (tab 2).
+"""
+
 import streamlit as st
 from matplotlib import pyplot as plt
 from model.data_downloader import get_station_results, get_sensors_by_station_list, get_latest_station_results, get_station_ids_list
 from model.api_handler import add_values_by_sensor
-
-'''
-Page allowing the user to display all sensors' results by station as a table (tab 1) or as charts by parameter (tab 2).
-'''
 
 st.title(":blue[Wyniki pomiarów wszystkich parametrów dla stacji]")
 st.write("Wybierz z bocznego menu ID stacji. Poniżej możesz zobaczyć wyniki wszystkich sensorów z danej stacji.")

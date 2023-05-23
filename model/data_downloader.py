@@ -1,9 +1,9 @@
+"""
+Module for selecting data from SQLite database.
+"""
+
 from model.base import Session
 import pandas as pd
-
-'''
-Module for selecting data from SQLite database.
-'''
 
 def get_stations_map():
     session = Session()

@@ -1,9 +1,9 @@
+"""
+Page allowing the user to display stations details by station ID (tab 1) or by city (tab 2).
+"""
+
 import streamlit as st
 from model.data_downloader import get_stations_list, get_station_details, get_station_details_by_city
-
-'''
-Page allowing the user to display stations details by station ID (tab 1) or by city (tab 2).
-'''
 
 tab1, tab2 = st.tabs(["Stacje po ID", "Stacje w danym mieście"])
 
