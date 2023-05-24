@@ -6,7 +6,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from model.data_downloader import get_sensor_results, get_sensor_ids_list
+from model.data_downloader import get_sensor_results, get_sensor_ids_list, display_legend
 from model.api_handler import add_values_by_sensor
 
 st.title(":blue[Wyniki pomiarów danego sensora z ostatnich dni]")
@@ -46,6 +46,7 @@ with tab1:
         else:
             st.write("Wybierz ID sensora w bocznym menu.")
 
+    display_legend()
 # Add a chart in tab2
 with tab2:
     import altair as alt
@@ -85,15 +86,17 @@ with tab2:
     fig, ax = plt.subplots()
 
     # Plot the original data on the axes
-    ax.plot(sensor_info['timestamp'], sensor_info['value'], label='Original data')
+    ax.plot(sensor_info['timestamp'], sensor_info['value'], label='Originalne dane')
 
     # Plot the trend line on the axes
     ax.plot(sensor_info['timestamp'], trend_func(time), 'r--', label='Trend')
 
     # Add labels
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Value')
+    ax.set_xlabel('Czas')
+    ax.set_ylabel('Wartość')
     ax.legend()
 
     # Display the plot
     st.pyplot(fig)
+
+    display_legend()

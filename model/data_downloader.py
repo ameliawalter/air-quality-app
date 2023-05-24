@@ -4,6 +4,7 @@ Module for selecting data from SQLite database.
 
 from model.base import Session
 import pandas as pd
+import streamlit as st
 
 def get_stations_map():
     session = Session()
@@ -140,3 +141,15 @@ def get_sensor_results(sensor_id):
         return results_df
     finally:
         Session.remove()
+
+def display_legend():
+    st.write(":red[Legenda:]")
+    st.markdown("- O3 - ozon")
+    st.markdown("- PM2.5 -  aerozole atmosferyczne (pył zawieszony) o średnicy nie większej niż 2,5 μm - poziom dopuszczalny 20 μg/m³ (uśrednienie roczne)")
+    st.markdown("- PM10 - aerozole atmosferyczne (pył gruby) o średnicy nie większej niż 10 μm - poziom dopuszczalny 50 µg/m3 (uśrednienie dobowe); poziom informowania: 100 µg/m3 (dobowy); poziom alarmowy: 150 µg/m3 (dobowy)")
+    st.markdown("- NO - tlenek azotu")
+    st.markdown("- NO2 - dwutlenek azotu - poziom dopuszczalny 200 µg/m3 (pomiar godzinny) lub 40 µg/m3 (uśrednienie roczne)")
+    st.markdown("- NOx - inne tlenki azotu - poziom dopuszczalny 30 µg/m3 (uśrednienie roczne)")
+    st.markdown("- SO2 - dwutlenek siarki - poziom dopuszczalny 350 µg/m3 (pomiar godzinny) lub 125 µg/m3 (uśrednienie dobowe)")
+    st.markdown("- C6H6 - benzen - poziom dopuszczalny 5 µg/m3 (uśrednienie roczne)")
+    st.write("Więcej informacji [na stronie GIOŚ](https://powietrze.gios.gov.pl/pjp/content/annual_assessment_air_acceptable_level)")
