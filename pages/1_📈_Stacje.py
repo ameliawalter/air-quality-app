@@ -49,7 +49,7 @@ with tab2:
     if city:
         station_info = get_station_details_by_city(city)
         if station_info.empty:
-            st.write("Taka stacja nie istnieje.")
+            st.write("Takie miasto nie istnieje.")
         else:
             st.write(station_info)
 

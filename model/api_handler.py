@@ -7,10 +7,9 @@ As they are changed on an unpredictable basis, DB needs to be cleared everytime 
 from decimal import Decimal
 
 import requests
-from sqlalchemy import inspect
 
 from model.air_quality_model import Commune, City, Station, Sensor, Result, AqIndex
-from model.base import Base, Session, engine
+from model.base import Session
 
 
 def add_all_communes():
@@ -178,4 +177,3 @@ def add_aq_index_values(station_id):
         Session.remove()
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
-
