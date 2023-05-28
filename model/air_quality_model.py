@@ -4,7 +4,9 @@ Module containing models for object-relational mapping with SQLAlchemy.
 
 from sqlalchemy import Column, String, ForeignKey, Numeric, Float, Integer
 from sqlalchemy.orm import relationship
+
 from model.base import Base
+
 
 class Commune(Base):
     __tablename__ = "communes"
@@ -14,6 +16,7 @@ class Commune(Base):
     cities = relationship("City", back_populates="communes")
     __table_args__ = {"extend_existing": True}
 
+
 class City(Base):
     __tablename__ = "cities"
     city_id = Column(String(50), primary_key=True)
@@ -22,6 +25,7 @@ class City(Base):
     stations = relationship("Station", back_populates="cities")
     communes = relationship("Commune", back_populates="cities")
     __table_args__ = {"extend_existing": True}
+
 
 class Station(Base):
     __tablename__ = "stations"
@@ -33,7 +37,7 @@ class Station(Base):
     city_name = Column(String(50), ForeignKey("cities.city_name"))
     cities = relationship("City", back_populates="stations")
     sensors = relationship("Sensor", back_populates="stations")
-    index = relationship("Index", back_populates="stations")
+    aq_index = relationship("AqIndex", back_populates="stations")
     __table_args__ = {"extend_existing": True}
 
 
@@ -61,14 +65,23 @@ class Result(Base):
     __table_args__ = {"extend_existing": True}
 
 
-class Index(Base):
-    __tablename__ = "index"
-    station_id = Column(String(50), ForeignKey("stations.station_id"), primary_key=True)
+class AqIndex(Base):
+    __tablename__ = "aq_index"
+    aq_index_id = Column(Integer, primary_key=True, autoincrement=True)
+    station_id = Column(String(50), ForeignKey("stations.station_id"))
     timestamp = Column(String(50))
     timestamp_source_data = Column(String(50))
     index_value = Column(Numeric(20))
-    critical_code = Column(String(50))
-    stations = relationship("Station", back_populates="index")
+    index_desc = Column(String(50))
+    so2_index_value = Column(Numeric(20))
+    so2_index_desc = Column(String(50))
+    no2_index_value = Column(Numeric(20))
+    no2_index_desc = Column(String(50))
+    pm10_index_value = Column(Numeric(20))
+    pm10_index_desc = Column(String(50))
+    pm25_index_value = Column(Numeric(20))
+    pm25_index_desc = Column(String(50))
+    o3_index_value = Column(Numeric(20))
+    o3_index_desc = Column(String(50))
+    stations = relationship("Station", back_populates="aq_index")
     __table_args__ = {"extend_existing": True}
-
-

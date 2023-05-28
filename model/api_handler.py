@@ -4,18 +4,13 @@ Function clear_database() has been included due to GIOS API's station IDs not be
 As they are changed on an unpredictable basis, DB needs to be cleared everytime the app is run.
 """
 
-from sqlalchemy import inspect
-import requests
-from model.data_downloader import get_sensor_results
-from model.air_quality_model import Commune, City, Station, Sensor, Result, Index
-from model.base import Base, Session, engine
+from decimal import Decimal
 
-def clear_database():
-    inspector = inspect(engine)
-    if inspector.has_table("stations"):
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
-    Session.remove()
+import requests
+from sqlalchemy import inspect
+
+from model.air_quality_model import Commune, City, Station, Sensor, Result, AqIndex
+from model.base import Base, Session, engine
 
 
 def add_all_communes():
@@ -75,8 +70,6 @@ def add_all_stations():
         data = response.json()
         session = Session()
         for station_dict in data['Lista stacji pomiarowych']:
-            # if None in station_dict.values():
-            #     continue
             station_id = station_dict['Identyfikator stacji']
             existing_station = session.query(Station).filter(Station.station_id == station_id).first()
             if not existing_station:
@@ -95,7 +88,6 @@ def add_all_stations():
 
 
 def add_sensors_to_station(station_id):
-    # station_id
     url = f"https://api.gios.gov.pl/pjp-api/v1/rest/station/sensors/{station_id}?size=500"
     try:
         response = requests.get(url)
@@ -120,9 +112,6 @@ def add_sensors_to_station(station_id):
         Session.remove()
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
-
-
-from decimal import Decimal
 
 
 def add_values_by_sensor(sensor_id):
@@ -150,12 +139,9 @@ def add_values_by_sensor(sensor_id):
                 result.value = Decimal(str(value)) if value is not None else None
                 session.add(result)
         session.commit()
-
         if result is not None:
             session.refresh(result)
-
         session.close()
-
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
@@ -168,23 +154,28 @@ def add_aq_index_values(station_id):
         data = response.json()
         session = Session()
         timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
-        existing_timestamp = session.query(Index).filter(Index.timestamp == timestamp).first()
+        existing_timestamp = session.query(AqIndex).filter(AqIndex.timestamp == timestamp).first()
         if not existing_timestamp:
-            if data['AqIndex']['Wartość indeksu'] is not None:
-                index = Index()
-                index.station_id = station_id
-                index.timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
-                index.timestamp_source_data = data['AqIndex']['Data danych źródłowych, z których policzono wartość indeksu dla wskaźnika st']
-                index.index_value = data['AqIndex']['Wartość indeksu']
-                index.critical_code = data['AqIndex']['Kod zanieczyszczenia krytycznego']
-                session.add(index)
-            else:
-                print(f"Skipped record for station_id {station_id} due to null value.")
+            aq_index = AqIndex()
+            aq_index.station_id = station_id
+            aq_index.timestamp = data['AqIndex']['Data wykonania obliczeń indeksu']
+            aq_index.timestamp_source_data = data['AqIndex'][
+                'Data danych źródłowych, z których policzono wartość indeksu dla wskaźnika st']
+            aq_index.index_value = data['AqIndex']['Wartość indeksu']
+            aq_index.index_desc = data['AqIndex']['Nazwa kategorii indeksu']
+            aq_index.so2_index_value = data['AqIndex']['Wartość indeksu dla wskaźnika SO2']
+            aq_index.so2_index_desc = data['AqIndex']['Nazwa kategorii indeksu dla wskażnika SO2']
+            aq_index.no2_index_value = data['AqIndex']['Wartość indeksu dla wskaźnika NO2']
+            aq_index.no2_index_desc = data['AqIndex']['Nazwa kategorii indeksu dla wskażnika NO2']
+            aq_index.pm10_index_value = data['AqIndex']['Wartość indeksu dla wskaźnika PM10']
+            aq_index.pm10_index_desc = data['AqIndex']['Nazwa kategorii indeksu dla wskażnika PM10']
+            aq_index.pm25_index_value = data['AqIndex']['Wartość indeksu dla wskaźnika PM2.5']
+            aq_index.pm25_index_desc = data['AqIndex']['Nazwa kategorii indeksu dla wskażnika PM2.5']
+            aq_index.o3_index_value = data['AqIndex']['Wartość indeksu dla wskaźnika O3']
+            aq_index.o3_index_desc = data['AqIndex']['Nazwa kategorii indeksu dla wskażnika O3']
+            session.add(aq_index)
         session.commit()
         Session.remove()
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
-# if __name__ == '__main__':
-#     add_values_by_sensor(49)
-#     print(get_sensor_results(49))

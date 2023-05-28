@@ -4,9 +4,10 @@ Page allowing the user to display all sensors' results by station as a table (ta
 
 import streamlit as st
 from matplotlib import pyplot as plt
+
+from model.api_handler import add_values_by_sensor
 from model.data_downloader import get_station_results, get_sensors_by_station_list, get_latest_station_results, \
     get_station_ids_list, display_legend
-from model.api_handler import add_values_by_sensor
 
 st.title(":blue[Wyniki pomiarów wszystkich parametrów dla stacji]")
 st.write("Wybierz z bocznego menu ID stacji. Poniżej możesz zobaczyć wyniki wszystkich sensorów z danej stacji.")
@@ -42,16 +43,17 @@ with tab2:
         else:
             unique_sensor_codes = station_info['sensor_code'].unique()
             for sensor_code in unique_sensor_codes:
-                sensor_data = station_info[station_info['sensor_code'] == sensor_code]
-                plt.figure()
-                plt.plot(sensor_data['timestamp'], sensor_data['value'])
-                plt.title(f"Kod sensora: {sensor_code}")
-                plt.xlabel("Czas")
-                plt.ylabel("Wartość parametru")
-                plt.xticks(rotation=45, ha='right', fontsize=8)
-                plt.gca().xaxis.set_major_locator(plt.MaxNLocator(20))
-                plt.tight_layout()
-                st.pyplot(plt)
+                if sensor_code:
+                    sensor_data = station_info[station_info['sensor_code'] == sensor_code]
+                    plt.figure()
+                    plt.plot(sensor_data['timestamp'], sensor_data['value'])
+                    plt.title(f"Kod sensora: {sensor_code}")
+                    plt.xlabel("Czas")
+                    plt.ylabel("Wartość parametru")
+                    plt.xticks(rotation=45, ha='right', fontsize=8)
+                    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(20))
+                    plt.tight_layout()
+                    st.pyplot(plt)
     else:
         st.write("Wybierz ID stacji w bocznym menu.")
 

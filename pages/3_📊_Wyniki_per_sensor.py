@@ -3,12 +3,13 @@ Page allowing the user to display results by sensor from the most recent 3 days 
 Page also contains a legend (display_legend() function) to help user determine is results fall into air quality norms.
 """
 
-import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from model.data_downloader import get_sensor_results, get_sensor_ids_list, display_legend
+import streamlit as st
+
 from model.api_handler import add_values_by_sensor
+from model.data_downloader import get_sensor_results, get_sensor_ids_list, display_legend
 
 st.title(":blue[Wyniki pomiarów danego sensora z ostatnich dni]")
 st.write('''Wybierz z bocznego menu ID sensora. Poniżej możesz zobaczyć wyniki z ostatnich 3 dni dla danego sensora 
@@ -50,6 +51,7 @@ with tab1:
 with tab2:
     # Write a chart for all the values for the given sensor
     import altair as alt
+
     chart = alt.Chart(sensor_info).mark_line().encode(
         x='timestamp',
         y='value'

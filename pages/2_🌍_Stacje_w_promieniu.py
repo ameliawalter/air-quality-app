@@ -2,17 +2,20 @@
 Page allowing the user to input a location name and search for station within a selected radius, then display it on a map.
 """
 
-import streamlit as st
-from geopy.geocoders import Nominatim
 from math import radians, cos, sin, sqrt, atan2
+
 import geopandas as gpd
-import pydeck as pdk
+import numpy as np
 import pandas as pd
+import pydeck as pdk
+import streamlit as st
+from geopy.distance import great_circle
+from geopy.geocoders import Nominatim
+from shapely.geometry import Polygon
+
 from model.air_quality_model import Station
 from model.base import Session
-import numpy as np
-from shapely.geometry import Polygon
-from geopy.distance import great_circle
+
 
 # Function to calculate distance using Haversine formula
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -20,13 +23,14 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     R = 6371.0
 
     distance = R * c
     return distance
+
 
 location = st.text_input('Wprowadź lokalizację:')
 radius = st.slider("Promień wyszukiwania (km)", 1, 100, 10)
@@ -49,7 +53,8 @@ if location:
                 nearby_stations.append(station)
 
         for station in nearby_stations:
-            st.write(f"ID stacji: {station.station_id}, Nazwa stacji: {station.station_name}, Odległość: {calculate_distance(loc_lat, loc_lon, station.lat, station.lon):.2f} km")
+            st.write(
+                f"ID stacji: {station.station_id}, Nazwa stacji: {station.station_name}, Odległość: {calculate_distance(loc_lat, loc_lon, station.lat, station.lon):.2f} km")
 
         station_df = pd.DataFrame([{
             'station_id': station.station_id,
@@ -58,6 +63,7 @@ if location:
             'lon': station.lon
         } for station in nearby_stations])
 
+
         def create_circle(latitude, longitude, radius_km):
             n_points = 100  # number of points in the polygon
             angles = np.linspace(0, 360, n_points)  # generate evenly spaced angles
@@ -65,6 +71,7 @@ if location:
                              for angle in angles]  # calculate points
             circle_points = [(point.longitude, point.latitude) for point in circle_points]  # convert to lon, lat
             return Polygon(circle_points)  # create and return a Polygon
+
 
         circle_layer = pdk.Layer(
             'GeoJsonLayer',

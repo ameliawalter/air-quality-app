@@ -2,9 +2,11 @@
 Module for selecting data from SQLite database.
 """
 
-from model.base import Session
 import pandas as pd
 import streamlit as st
+
+from model.base import Session
+
 
 def get_stations_map():
     session = Session()
@@ -15,6 +17,7 @@ def get_stations_map():
     finally:
         Session.remove()
 
+
 def get_stations_list():
     session = Session()
     try:
@@ -23,6 +26,7 @@ def get_stations_list():
         return stations_list_df
     finally:
         Session.remove()
+
 
 def get_station_ids_list():
     session = Session()
@@ -33,6 +37,7 @@ def get_station_ids_list():
     finally:
         Session.remove()
 
+
 def get_sensor_ids_list():
     session = Session()
     try:
@@ -42,15 +47,18 @@ def get_sensor_ids_list():
     finally:
         Session.remove()
 
+
 def get_sensors_by_station_list(station_id):
     session = Session()
     try:
         sensors_ids_query = f'SELECT sensors.sensor_id FROM stations JOIN sensors ' \
-                                f'ON stations.station_id=sensors.station_id WHERE stations.station_id="{station_id}" '
+                            f'ON stations.station_id=sensors.station_id WHERE stations.station_id="{station_id}" '
         sensors_ids_df = pd.read_sql_query(sensors_ids_query, session.bind)
         return sensors_ids_df['sensor_id'].tolist()
     finally:
         Session.remove()
+
+
 def get_station_details(station_id):
     session = Session()
     try:
@@ -62,6 +70,7 @@ def get_station_details(station_id):
     finally:
         Session.remove()
 
+
 def get_station_details_by_city(city):
     session = Session()
     try:
@@ -72,6 +81,7 @@ def get_station_details_by_city(city):
         return station_details_df
     finally:
         Session.remove()
+
 
 def get_station_results(station_id):
     session = Session()
@@ -98,6 +108,7 @@ def get_station_results(station_id):
         return station_results_df
     finally:
         Session.remove()
+
 
 def get_latest_station_results(station_id):
     session = Session()
@@ -128,6 +139,24 @@ def get_latest_station_results(station_id):
         Session.remove()
 
 
+def get_aq_index_by_station(station_id):
+    session = Session()
+    try:
+        index_results_query = f'''
+            SELECT 
+                *
+            FROM 
+                aq_index 
+            WHERE 
+                station_id="{station_id}" 
+            '''
+        qa_index_df = pd.read_sql_query(index_results_query, session.bind)
+        html = qa_index_df.T.to_html()
+        return st.write(html, unsafe_allow_html=True)
+    finally:
+        Session.remove()
+
+
 def get_sensor_results(sensor_id):
     session = Session()
     try:
@@ -142,14 +171,20 @@ def get_sensor_results(sensor_id):
     finally:
         Session.remove()
 
+
 def display_legend():
     st.write(":red[Legenda:]")
     st.markdown("- O3 - ozon")
-    st.markdown("- PM2.5 -  aerozole atmosferyczne (pył zawieszony) o średnicy nie większej niż 2,5 μm - poziom dopuszczalny **20 μg/m³ (uśrednienie roczne)**")
-    st.markdown("- PM10 - aerozole atmosferyczne (pył gruby) o średnicy nie większej niż 10 μm - poziom dopuszczalny **50 µg/m³ (uśrednienie dobowe)**; poziom informowania: 100 µg/m³ (dobowy); poziom alarmowy: 150 µg/m³ (dobowy)")
+    st.markdown(
+        "- PM2.5 -  aerozole atmosferyczne (pył zawieszony) o średnicy nie większej niż 2,5 μm - poziom dopuszczalny **20 μg/m³ (uśrednienie roczne)**")
+    st.markdown(
+        "- PM10 - aerozole atmosferyczne (pył gruby) o średnicy nie większej niż 10 μm - poziom dopuszczalny **50 µg/m³ (uśrednienie dobowe)**; poziom informowania: 100 µg/m³ (dobowy); poziom alarmowy: 150 µg/m³ (dobowy)")
     st.markdown("- NO - tlenek azotu")
-    st.markdown("- NO2 - dwutlenek azotu - poziom dopuszczalny **200 µg/m³ (pomiar godzinny) lub 40 µg/m³ (uśrednienie roczne)**")
+    st.markdown(
+        "- NO2 - dwutlenek azotu - poziom dopuszczalny **200 µg/m³ (pomiar godzinny) lub 40 µg/m³ (uśrednienie roczne)**")
     st.markdown("- NOx - inne tlenki azotu - poziom dopuszczalny **30 µg/m³ (uśrednienie roczne)**")
-    st.markdown("- SO2 - dwutlenek siarki - poziom dopuszczalny **350 µg/m³ (pomiar godzinny) lub 125 µg/m³ (uśrednienie dobowe)**")
+    st.markdown(
+        "- SO2 - dwutlenek siarki - poziom dopuszczalny **350 µg/m³ (pomiar godzinny) lub 125 µg/m³ (uśrednienie dobowe)**")
     st.markdown("- C6H6 - benzen - poziom dopuszczalny **5 µg/m³ (uśrednienie roczne)**")
-    st.write("Więcej informacji [na stronie GIOŚ](https://powietrze.gios.gov.pl/pjp/content/annual_assessment_air_acceptable_level)")
+    st.write(
+        "Więcej informacji [na stronie GIOŚ](https://powietrze.gios.gov.pl/pjp/content/annual_assessment_air_acceptable_level)")

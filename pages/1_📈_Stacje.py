@@ -3,7 +3,9 @@ Page allowing the user to display stations details by station ID (tab 1) or by c
 """
 
 import streamlit as st
-from model.data_downloader import get_stations_list, get_station_details, get_station_details_by_city
+
+from model.data_downloader import get_stations_list, get_station_details, get_station_details_by_city, \
+    get_station_ids_list
 
 tab1, tab2 = st.tabs(["Stacje po ID", "Stacje w danym mieście"])
 
@@ -13,9 +15,7 @@ with tab1:
     st.sidebar.title("Szukaj")
     st.sidebar.write("Wyświetl więcej szczegółów wybranej stacji")
 
-    stations_df = get_stations_list()
-    station_ids = stations_df['station_id'].tolist()
-
+    station_ids = get_station_ids_list()
     activate_search_window = st.sidebar.checkbox("Wpisz samodzielnie ID")
 
     if activate_search_window:
@@ -43,7 +43,8 @@ with tab1:
             st.write("Wybierz ID stacji w bocznym menu.")
 
 with tab2:
-    st.write(':blue[Wyszukaj wszystkie stacje w danym mieście, żeby wyświetlić szczegóły na temat mierzonych parametrów.]')
+    st.write(
+        ':blue[Wyszukaj wszystkie stacje w danym mieście, żeby wyświetlić szczegóły na temat mierzonych parametrów.]')
     city = st.text_input("Wpisz miasto")
     if city:
         station_info = get_station_details_by_city(city)
@@ -51,7 +52,6 @@ with tab2:
             st.write("Taka stacja nie istnieje.")
         else:
             st.write(station_info)
-
 
 # Display a list of stations
 list_df = get_stations_list()
