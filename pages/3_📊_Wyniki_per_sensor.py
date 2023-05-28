@@ -1,5 +1,6 @@
 """
 Page allowing the user to display results by sensor from the most recent 3 days as a table (tab 1) or as a chart with statistics (tab 2).
+Page also contains a legend (display_legend() function) to help user determine is results fall into air quality norms.
 """
 
 import streamlit as st
@@ -17,9 +18,7 @@ tab1, tab2 = st.tabs(["Tabela wyników", "Statystyki"])
 
 with tab1:
     st.sidebar.write("Wyświetl pomiary danego sensora")
-
     sensor_ids = get_sensor_ids_list()
-
     activate_search_window = st.sidebar.checkbox("Wpisz samodzielnie ID sensora")
 
     if activate_search_window:
@@ -47,55 +46,51 @@ with tab1:
             st.write("Wybierz ID sensora w bocznym menu.")
 
     display_legend()
-# Add a chart in tab2
+
 with tab2:
+    # Write a chart for all the values for the given sensor
     import altair as alt
     chart = alt.Chart(sensor_info).mark_line().encode(
         x='timestamp',
         y='value'
     )
-
     st.altair_chart(chart)
+
+    # Display basic statistics
     max_row = sensor_info.loc[sensor_info['value'].idxmax()]
     min_row = sensor_info.loc[sensor_info['value'].idxmin()]
-    st.write(f"Wartość maksymalna: {max_row['value']} o godzinie: {max_row['timestamp']}")
-    st.write(f"Wartość minimalna: {min_row['value']} o godzinie: {min_row['timestamp']}")
+    st.write(f"Wartość maksymalna: {max_row['value']} w dniu i o godzinie: {max_row['timestamp']}")
+    st.write(f"Wartość minimalna: {min_row['value']} w dniu i o godzinie: {min_row['timestamp']}")
     mean_value = round(sensor_info['value'].mean(), 3)
     st.write(f"Średnia wartość: {mean_value}")
 
+    # Display the trend
     time = list(range(len(sensor_info)))
     # Fit a degree-1 polynomial (a line) to the data
     trend_line = np.polyfit(time, sensor_info['value'], 1)
     # trend_line[0] is the slope of the fitted line (i.e., the trend)
     st.write(f"Trend: {trend_line[0]}")
-
     sensor_info['timestamp'] = pd.to_datetime(sensor_info['timestamp'], format='%Y-%m-%d %H:%M:%S')
     # Sort the dataframe by timestamp
     sensor_info = sensor_info.sort_values('timestamp')
-
     # Create a time variable
     time = list(range(len(sensor_info)))
-
     # Fit a degree-1 polynomial (a line) to the data
     trend_line = np.polyfit(time, sensor_info['value'], 1)
-
     # Create a function that represents the trend line
     trend_func = np.poly1d(trend_line)
-
     # Create a figure and axis object
-    fig, ax = plt.subplots()
-
+    fig, ax = plt.subplots(figsize=(10, 6))
     # Plot the original data on the axes
-    ax.plot(sensor_info['timestamp'], sensor_info['value'], label='Originalne dane')
-
+    ax.plot(sensor_info['timestamp'], sensor_info['value'], label='Oryginalne dane')
     # Plot the trend line on the axes
     ax.plot(sensor_info['timestamp'], trend_func(time), 'r--', label='Trend')
-
     # Add labels
     ax.set_xlabel('Czas')
     ax.set_ylabel('Wartość')
     ax.legend()
-
+    # Rotate x-axis labels to prevent overlap
+    plt.xticks(rotation=45)
     # Display the plot
     st.pyplot(fig)
 

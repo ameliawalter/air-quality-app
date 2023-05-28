@@ -7,10 +7,12 @@ from geopy.geocoders import Nominatim
 from math import radians, cos, sin, sqrt, atan2
 import geopandas as gpd
 import pydeck as pdk
-from shapely.geometry import Point
 import pandas as pd
 from model.air_quality_model import Station
 from model.base import Session
+import numpy as np
+from shapely.geometry import Polygon
+from geopy.distance import great_circle
 
 # Function to calculate distance using Haversine formula
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -56,9 +58,17 @@ if location:
             'lon': station.lon
         } for station in nearby_stations])
 
+        def create_circle(latitude, longitude, radius_km):
+            n_points = 100  # number of points in the polygon
+            angles = np.linspace(0, 360, n_points)  # generate evenly spaced angles
+            circle_points = [great_circle(kilometers=radius_km).destination((latitude, longitude), angle)
+                             for angle in angles]  # calculate points
+            circle_points = [(point.longitude, point.latitude) for point in circle_points]  # convert to lon, lat
+            return Polygon(circle_points)  # create and return a Polygon
+
         circle_layer = pdk.Layer(
             'GeoJsonLayer',
-            data=gpd.GeoSeries([Point(loc_lon, loc_lat).buffer(radius/111.12)]).__geo_interface__,
+            data=gpd.GeoSeries([create_circle(loc_lat, loc_lon, radius)]).__geo_interface__,
             get_fill_color=[0, 0, 255, 80],
             pickable=False,
             filled=True

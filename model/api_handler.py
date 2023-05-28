@@ -160,36 +160,6 @@ def add_values_by_sensor(sensor_id):
         print("Request failed:", e)
 
 
-# def add_values_by_sensor(sensor_id):
-#     url = f"https://api.gios.gov.pl/pjp-api/v1/rest/data/getData/{sensor_id}?size=500"
-#     try:
-#         response = requests.get(url)
-#         response.raise_for_status()
-#         data = response.json()
-#         session = Session()
-#         result = None
-#         for result_dict in data['Lista danych pomiarowych']:
-#             if None in result_dict.values():
-#                 continue
-#             sensor_code = result_dict['Kod stanowiska']
-#             result.timestamp = result_dict['Data']
-#             existing_sensor_code = session.query(Result).filter(Result.sensor_code == sensor_code).first()
-#             if not existing_sensor_code:
-#                 result = Result()
-#                 result.result_id = None
-#                 result.sensor_code = result_dict['Kod stanowiska']
-#                 result.sensor_id = sensor_id
-#                 result.timestamp = result_dict['Data']
-#                 value = result_dict['Wartość']
-#                 result.value = Decimal(str(value)) if value is not None else None
-#                 session.add(result)
-#         session.commit()
-#         session.refresh(result)
-#         Session.remove()
-#     except requests.exceptions.RequestException as e:
-#         print("Request failed:", e)
-
-
 def add_aq_index_values(station_id):
     url = f"https://api.gios.gov.pl/pjp-api/v1/rest/aqindex/getIndex/{station_id}?size=500"
     try:
@@ -215,6 +185,6 @@ def add_aq_index_values(station_id):
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
 
-if __name__ == '__main__':
-    add_values_by_sensor(49)
-    print(get_sensor_results(49))
+# if __name__ == '__main__':
+#     add_values_by_sensor(49)
+#     print(get_sensor_results(49))

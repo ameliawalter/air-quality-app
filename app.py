@@ -25,7 +25,7 @@ st.set_page_config(page_title="Jakość powietrza w Polsce", page_icon="📈", l
 st.title(":blue[Stacje pomiaru jakości powietrza w Polsce]")
 st.write("Dane dotyczące jakości powietrza w całej Polsce. Dzięki opcjom bocznego menu możesz:")
 
-# Map
+# Map with all the Polish air quality measurement stations
 try:
     map_df = get_stations_map()
     layer = pdk.Layer(
