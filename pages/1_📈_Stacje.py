@@ -49,11 +49,11 @@ with tab2:
     if city:
         station_info = get_station_details_by_city(city)
         if station_info.empty:
-            st.write("Takie miasto nie istnieje.")
+            st.write("Takie miasto nie istnieje lub nie posiada na swoim terenie stacji.")
         else:
             st.write(station_info)
 
 # Display a list of stations
 list_df = get_stations_list()
 st.write(':blue[Lista wszystkich stacji]')
-st.write(list_df[['station_id', 'station_name', 'station_address', 'city_name']])
+st.write(get_stations_list())

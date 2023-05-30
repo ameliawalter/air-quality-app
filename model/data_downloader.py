@@ -21,7 +21,11 @@ def get_stations_map():
 def get_stations_list():
     session = Session()
     try:
-        stations_list_query = 'SELECT station_id, station_name, station_address, city_name FROM stations'
+        stations_list_query = '''SELECT station_id as "ID stacji", 
+                                    station_name as "Nazwa stacji", 
+                                    station_address as "Adres", 
+                                    city_name as "Miasto" 
+                                    FROM stations'''
         stations_list_df = pd.read_sql_query(stations_list_query, session.bind)
         return stations_list_df
     finally:
@@ -62,9 +66,15 @@ def get_sensors_by_station_list(station_id):
 def get_station_details(station_id):
     session = Session()
     try:
-        station_details_query = f'SELECT stations.station_name, stations.station_address, stations.city_name, ' \
-                                f'sensors.sensor_id, sensors.param_name, sensors.param_id FROM stations JOIN sensors ' \
-                                f'ON stations.station_id=sensors.station_id WHERE stations.station_id="{station_id}" '
+        station_details_query = f'''SELECT stations.station_name as "Nazwa stacji", 
+                                        stations.station_address as "Adres",
+                                         stations.city_name as "Miasto", 
+                                            sensors.sensor_id as "ID sensora", 
+                                            sensors.param_name as "Parametr sensora",
+                                             sensors.param_id as "ID parametru"
+                                              FROM stations JOIN sensors 
+                                                ON stations.station_id=sensors.station_id 
+                                                WHERE stations.station_id="{station_id}"'''
         station_details_df = pd.read_sql_query(station_details_query, session.bind)
         return station_details_df
     finally:
@@ -115,12 +125,10 @@ def get_latest_station_results(station_id):
     try:
         station_results_query = f'''
             SELECT 
-                stations.station_name, 
-                stations.lon, 
-                stations.lat, 
-                results.sensor_code, 
-                results.timestamp, 
-                results.value 
+                stations.station_name as "Nazwa stacji", 
+                results.sensor_code as "Kod sensora", 
+                results.timestamp as "Czas", 
+                results.value as "Wynik" 
             FROM 
                 stations 
             LEFT JOIN 
@@ -144,7 +152,20 @@ def get_aq_index_by_station(station_id):
     try:
         index_results_query = f'''
             SELECT 
-                *
+                timestamp as "Czas (obliczenie indeksu)",
+                timestamp_source_data as "Czas (pomiar danych)",
+                index_value as "Wartość indeksu",
+                index_desc as "Opis indeksu",
+                so2_index_value as "Indeks SO2",
+                so2_index_desc as "Opis indeksu SO2",
+                no2_index_value as "Indeks NO2",
+                no2_index_desc as "Opis indeksu NO2",
+                pm10_index_value as "Indeks PM10",
+                pm10_index_desc as "Opis indeksu PM10",
+                pm25_index_value as "Indeks PM 2.5",
+                pm25_index_desc as "Opis indeksu PM 2.5", 
+                o3_index_value as "Indeks O3",
+                o3_index_desc as "Opis indeksu O3"
             FROM 
                 aq_index 
             WHERE 
@@ -161,7 +182,11 @@ def get_sensor_results(sensor_id):
     session = Session()
     try:
         results_query = f'''SELECT 
-        stations.station_id, results.sensor_id, results.sensor_code, results.timestamp, results.value 
+        stations.station_id as "ID stacji", 
+        results.sensor_id as "ID sensora",
+        results.sensor_code as "Kod sensora", 
+        results.timestamp as "Czas",
+        results.value as "Wynik"
         FROM stations
         JOIN sensors ON stations.station_id=sensors.station_id
         JOIN results ON sensors.sensor_id=results.sensor_id
