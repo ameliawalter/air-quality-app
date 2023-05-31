@@ -102,9 +102,15 @@ def get_station_details(station_id):
 def get_station_details_by_city(city):
     session = Session()
     try:
-        station_details_query = f'SELECT stations.station_id, stations.station_name, stations.station_address, stations.city_name, ' \
-                                f'sensors.sensor_id, sensors.param_name, sensors.param_id FROM stations JOIN sensors ' \
-                                f'ON stations.station_id=sensors.station_id WHERE stations.city_name="{city}" '
+        station_details_query = f'''SELECT stations.station_id as "ID stacji", 
+                                            stations.station_name as "Nazwa stacji", 
+                                            stations.station_address as "Adres", 
+                                            stations.city_name as "Miasto", 
+                                            sensors.sensor_id as "ID sensora", 
+                                            sensors.param_name as "Parametr", 
+                                            sensors.param_id as "ID parametru" FROM stations JOIN sensors 
+                                            ON stations.station_id=sensors.station_id 
+                                            WHERE stations.city_name="{city}"'''
         station_details_df = pd.read_sql_query(station_details_query, session.bind)
         return station_details_df
     finally:
