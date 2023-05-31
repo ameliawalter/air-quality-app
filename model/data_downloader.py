@@ -62,6 +62,24 @@ def get_sensors_by_station_list(station_id):
     finally:
         Session.remove()
 
+def get_sensor_results(sensor_id):
+    session = Session()
+    try:
+        results_query = f'''SELECT 
+        stations.station_id as "ID stacji", 
+        results.sensor_id as "ID sensora",
+        results.sensor_code as "Kod sensora", 
+        results.timestamp as "Czas",
+        results.value as "Wynik"
+        FROM stations
+        JOIN sensors ON stations.station_id=sensors.station_id
+        JOIN results ON sensors.sensor_id=results.sensor_id
+        WHERE results.sensor_id="{sensor_id}"'''
+        results_df = pd.read_sql_query(results_query, session.bind)
+        return results_df
+    finally:
+        Session.remove()
+
 
 def get_station_details(station_id):
     session = Session()
@@ -174,25 +192,6 @@ def get_aq_index_by_station(station_id):
         qa_index_df = pd.read_sql_query(index_results_query, session.bind)
         html = qa_index_df.T.to_html()
         return st.write(html, unsafe_allow_html=True)
-    finally:
-        Session.remove()
-
-
-def get_sensor_results(sensor_id):
-    session = Session()
-    try:
-        results_query = f'''SELECT 
-        stations.station_id as "ID stacji", 
-        results.sensor_id as "ID sensora",
-        results.sensor_code as "Kod sensora", 
-        results.timestamp as "Czas",
-        results.value as "Wynik"
-        FROM stations
-        JOIN sensors ON stations.station_id=sensors.station_id
-        JOIN results ON sensors.sensor_id=results.sensor_id
-        WHERE results.sensor_id="{sensor_id}"'''
-        results_df = pd.read_sql_query(results_query, session.bind)
-        return results_df
     finally:
         Session.remove()
 
